@@ -29,7 +29,9 @@ map<double, double> get_train_data_peak_1note(vector<double>& freq_data, double 
 	//根据一个训练的音符的频率数据，来计算这个音符的频率峰值点
 	for (int t = 2; t <= freq_data.size() - 1; t++) {
 		double freq = t * sample_ratio;
-		//如果频率数值超过了最高音符对应的频率值（1760Hz），就不用继续了
+		//如果频率数值超过了最高音符对应的频率值（1760Hz），就不用继续了。如果频率数值低于最低音符对应的频率，不应认为是峰值点。
+		if (freq < NoteFreq[0])
+			continue;
 		if (freq > NoteFreq[48])
 			break;
 		//判断这个频率点是不是一个峰值。峰值的频率幅值必须高于PRESS。相邻两个峰值的频率至少要相差1个全音

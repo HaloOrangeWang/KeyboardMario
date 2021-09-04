@@ -1,0 +1,7 @@
+*.pyc
+*.pyd
+.idea/
+.vs/
+x64/
+__pycache__/
+TrainData/

@@ -6,3 +6,5 @@ test.py
 x64/
 __pycache__/
 TrainData/
+TestData/
+old_code/

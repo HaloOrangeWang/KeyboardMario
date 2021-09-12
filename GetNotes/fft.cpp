@@ -6,6 +6,8 @@
 
 using namespace std;
 
+vector<int> LastNoteIndexes;
+
 vector<int> get_order(vector<int>& ary)
 {
 	if (ary.size() <= 3) {
@@ -108,12 +110,21 @@ vector<int> get_note_indexes(vector<double>& freq_data, double sample_ratio)
 	//根据音频的频率幅值信息，判定按下了哪些音符
 	vector<int> note_indexes;
 	//获取这段音频的频谱峰值点。峰值点之间至少要相差一个全音
-	map<double, double> peaks = get_train_data_peak_1note(freq_data, sample_ratio, PRESS * PRESS_RATIO);
+	map<double, double> peaks = get_train_data_peak_1note(freq_data, sample_ratio, PRESS * PRESS_RATIO_2);
 	//判断峰值点的分布情况是否符合每个音符点的训练数据。判断方式是，训练数据中的每个峰值点都在这组音频数据中有体现
 	for (int t = 0; t <= 5; t++) {
 		int num_peak_match = 0;
 		int num_peak_not_match = 0;
 		double avr_peak_ratio = 0;
+		double press_ratio_tmp = PRESS_RATIO;
+		if (LastNoteIndexes.size() >= 1){
+			for (int t0 = 0; t0 <= LastNoteIndexes.size() - 1; t0++) {
+				if (LastNoteIndexes[t0] == t){
+					press_ratio_tmp = PRESS_RATIO_2;
+					break;
+				}
+			}
+		}
 		for (map<double, double>::iterator peak_it = NoteFreqPeaks[t].begin(); peak_it != NoteFreqPeaks[t].end(); peak_it++) {
 			double freq = peak_it->first;
 			double amp1 = peak_it->second;
@@ -121,7 +132,7 @@ vector<int> get_note_indexes(vector<double>& freq_data, double sample_ratio)
 			for (map<double, double>::iterator peak_it2 = peaks.begin(); peak_it2 != peaks.end(); peak_it2++) {
 				double freq2 = peak_it2->first;
 				double amp2 = peak_it2->second;
-				if (freq2 / freq < pow(2, 2 / 12.f) && freq / freq2 < pow(2, 2 / 12.f) && amp2 / amp1 > PRESS_RATIO) {
+				if (freq2 / freq < pow(2, 2 / 12.f) && freq / freq2 < pow(2, 2 / 12.f) && amp2 / amp1 > press_ratio_tmp) {
 					is_in_wave = true;
 					break;
 				}
@@ -133,9 +144,10 @@ vector<int> get_note_indexes(vector<double>& freq_data, double sample_ratio)
 				num_peak_not_match += 1;
 			}
 		}
-		double peak_match_ratio = (num_peak_match + num_peak_not_match == 0) ? 0 : num_peak_match / (num_peak_match + num_peak_not_match);
+		double peak_match_ratio = (num_peak_match + num_peak_not_match == 0) ? 0 : num_peak_match * 1.0 / (num_peak_match + num_peak_not_match);
 		if (peak_match_ratio >= PRESS_PEAKS_RATIO)
 			note_indexes.push_back(t);
 	}
+	LastNoteIndexes = note_indexes;
 	return note_indexes;
 }

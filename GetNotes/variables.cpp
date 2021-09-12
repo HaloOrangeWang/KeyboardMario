@@ -32,7 +32,7 @@ map<double, double> get_train_data_peak_1note(vector<double>& freq_data, double 
 		//如果频率数值超过了最高音符对应的频率值（1760Hz），就不用继续了。如果频率数值低于最低音符对应的频率，不应认为是峰值点。
 		if (freq < NoteFreq[0])
 			continue;
-		if (freq > NoteFreq[48])
+		if (freq > MAX_FREQ)
 			break;
 		//判断这个频率点是不是一个峰值。峰值的频率幅值必须高于PRESS。相邻两个峰值的频率至少要相差1个全音
 		if (freq_data[t] < press_ratio)
